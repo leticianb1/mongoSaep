@@ -26,12 +26,10 @@ public class ResolucaoMongoTest {
 		ParecerRepositoryMongo parecerDao;
 		ResolucaoRepositoryMongo resolucaoDao;
 		
-		
 		@Before
 		public void setUp(){
 			parecerDao = new ParecerRepositoryMongo();
 			resolucaoDao = new ResolucaoRepositoryMongo();
-			
 				
 			Regra r = new Regra("v", 1, "d", 1, 0, "a", null, null, null, 1, new ArrayList<String>());
 	        regras = new ArrayList<>();

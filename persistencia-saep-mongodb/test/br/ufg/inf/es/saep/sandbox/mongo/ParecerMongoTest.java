@@ -1,5 +1,7 @@
 package br.ufg.inf.es.saep.sandbox.mongo;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +25,9 @@ import br.ufg.inf.es.saep.sandbox.dominio.Relato;
 import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
 import br.ufg.inf.es.saep.sandbox.dominio.Valor;
 
+import org.junit.Assert;
+import org.junit.Assert.*;
+
 public class ParecerMongoTest {
 	ParecerRepositoryMongo parecerDao;
 	ResolucaoRepositoryMongo resolucaoDao;
@@ -32,7 +37,6 @@ public class ParecerMongoTest {
 	public void setUp(){
 		parecerDao = new ParecerRepositoryMongo();
 		resolucaoDao = new ResolucaoRepositoryMongo();
-		
 	} 
 	
 	@Test
@@ -62,24 +66,10 @@ public class ParecerMongoTest {
 		notas.add(nota);
 		
 		Parecer parecer02 = new Parecer(parecerId, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-		System.out.println("\n parecer02");
-		System.out.println("ID " +parecer02.getId());
-		System.out.println("Resolucao " +parecer02.getResolucao());
-		for (Pontuacao pont : parecer02.getPontuacoes()) {
-			System.out.println("Atributo da pontuacao" +pont.getAtributo());
-			System.out.println("valor da pontuacao"+pont.getValor().getString());
-		}
-		for (String radocDaListaId : parecer02.getRadocs()) {
-			System.out.println("Radoc "+radocDaListaId);
-		}
-		System.out.println("Fundamentacao "+parecer02.getFundamentacao());
-		
-		
-		
+
 		parecerDao.persisteParecer(parecer02);
 		
-		
-		assert parecerDao.byId(parecerId)!= null;
+		assertNotNull(parecerDao.byId(parecerId));
 	}
 	
 	@Test(expected=IdentificadorDesconhecido.class)
@@ -109,17 +99,6 @@ public class ParecerMongoTest {
 		notas.add(nota);
 		
 		Parecer parecer02 = new Parecer(id, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-		System.out.println("\n parecer02");
-		System.out.println("ID " +parecer02.getId());
-		System.out.println("Resolucao " +parecer02.getResolucao());
-		for (Pontuacao pont : parecer02.getPontuacoes()) {
-			System.out.println("Atributo da pontuacao" +pont.getAtributo());
-			System.out.println("valor da pontuacao"+pont.getValor().getString());
-		}
-		for (String radocDaListaId : parecer02.getRadocs()) {
-			System.out.println("Radoc "+radocDaListaId);
-		}
-		System.out.println("Fundamentacao "+parecer02.getFundamentacao());
 		
 		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
 		
@@ -154,17 +133,6 @@ public class ParecerMongoTest {
 		notas.add(nota);
 		
 		Parecer parecer02 = new Parecer(id, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-		System.out.println("\n parecer02");
-		System.out.println("ID " +parecer02.getId());
-		System.out.println("Resolucao " +parecer02.getResolucao());
-		for (Pontuacao pont : parecer02.getPontuacoes()) {
-			System.out.println("Atributo da pontuacao" +pont.getAtributo());
-			System.out.println("valor da pontuacao"+pont.getValor().getString());
-		}
-		for (String radocDaListaId : parecer02.getRadocs()) {
-			System.out.println("Radoc "+radocDaListaId);
-		}
-		System.out.println("Fundamentacao "+parecer02.getFundamentacao());
 		
 		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
 		
@@ -195,11 +163,8 @@ public class ParecerMongoTest {
 		tamanhoAntes = parecerDao.byId(parecerId).getNotas().size();
 		parecerDao.adicionaNota(parecerId, nota);
 		tamanhoDepois = parecerDao.byId(parecerId).getNotas().size();
-		System.out.println(tamanhoAntes);
-		System.out.println(tamanhoDepois);
 		
-		assert tamanhoAntes != tamanhoDepois;
-		
+		assertNotEquals(tamanhoAntes, tamanhoDepois);
 	}
 	
 	@Test (expected=IdentificadorDesconhecido.class)
@@ -219,7 +184,6 @@ public class ParecerMongoTest {
 		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
 		
 		parecerDao.adicionaNota(parecerId, nota);
-		
 	}
 	
 	@Test
@@ -242,11 +206,8 @@ public class ParecerMongoTest {
 		tamanhoAntes = parecerDao.byId(parecerId).getNotas().size();
 		parecerDao.removeNota(parecerId, pontuacao);
 		tamanhoDepois = parecerDao.byId(parecerId).getNotas().size();
-		System.out.println(tamanhoAntes);
-		System.out.println(tamanhoDepois);
 		
-		assert tamanhoAntes != tamanhoDepois;
-		
+		assertNotEquals(tamanhoAntes, tamanhoDepois);
 	}
 	
 	@Test (expected=IdentificadorDesconhecido.class)
@@ -256,7 +217,6 @@ public class ParecerMongoTest {
 		String fundamentacao = "pq sim";
 		
 		parecerDao.atualizaFundamentacao(parecerId, fundamentacao);
-		
 	}
 	
 	@Test
@@ -267,8 +227,7 @@ public class ParecerMongoTest {
 		
 		parecerDao.atualizaFundamentacao(parecerId, fundamentacao);
 		
-		
-		assert parecerDao.byId(parecerId).getFundamentacao().equals(fundamentacao);
+		assertEquals(parecerDao.byId(parecerId).getFundamentacao(), fundamentacao);		
 	}
 	
 	@Test (expected=CampoExigidoNaoFornecido.class)
@@ -288,13 +247,11 @@ public class ParecerMongoTest {
 		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
 		Map<String, Valor> valores = new HashMap<String, Valor>();
 
-		
 		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
 			Valor value = new Valor("valor");
 			valores.put(atributo2.getNome(), value);
 		}
 		
-
 		Relato relato = new Relato(tipoID, valores);
 
 		List<Relato> relatos = new ArrayList<Relato>();
@@ -321,13 +278,11 @@ public class ParecerMongoTest {
 		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
 		Map<String, Valor> valores = new HashMap<String, Valor>();
 
-		
 		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
 			Valor value = new Valor("valor");
 			valores.put(atributo2.getNome(), value);
 		}
 		
-
 		Relato relato = new Relato(tipoID, valores);
 
 		List<Relato> relatos = new ArrayList<Relato>();
@@ -337,7 +292,6 @@ public class ParecerMongoTest {
 
 		parecerDao.persisteRadoc(radoc);
 		parecerDao.persisteRadoc(radoc);
-		
 	}
 	
 	@Test 
@@ -357,13 +311,11 @@ public class ParecerMongoTest {
 		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
 		Map<String, Valor> valores = new HashMap<String, Valor>();
 
-		
 		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
 			Valor value = new Valor("valor");
 			valores.put(atributo2.getNome(), value);
 		}
 		
-
 		Relato relato = new Relato(tipoID, valores);
 
 		List<Relato> relatos = new ArrayList<Relato>();
@@ -372,8 +324,8 @@ public class ParecerMongoTest {
 		Radoc radoc = new Radoc(radocId, anoBase, relatos);
 
 		parecerDao.persisteRadoc(radoc);
-		assert parecerDao.radocById(radocId) != null;
 		
+		assertNotNull(parecerDao.radocById(radocId));
 	}
 	
 	@Test 
@@ -399,7 +351,6 @@ public class ParecerMongoTest {
 			valores.put(atributo2.getNome(), value);
 		}
 		
-
 		Relato relato = new Relato(tipoID, valores);
 
 		List<Relato> relatos = new ArrayList<Relato>();
@@ -408,8 +359,8 @@ public class ParecerMongoTest {
 		Radoc radoc = new Radoc(radocId, anoBase, relatos);
 
 		parecerDao.persisteRadoc(radoc);
-		assert parecerDao.radocById(radocId) != null;
 		
+		assertNotNull(parecerDao.radocById(radocId));
 	}
 	
 	@Test (expected=ExisteParecerReferenciandoRadoc.class)
@@ -439,19 +390,6 @@ public class ParecerMongoTest {
 		notas.add(nota);
 		
 		Parecer parecer02 = new Parecer(parecerId, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-		System.out.println("\n parecer02");
-		System.out.println("ID " +parecer02.getId());
-		System.out.println("Resolucao " +parecer02.getResolucao());
-		for (Pontuacao pont : parecer02.getPontuacoes()) {
-			System.out.println("Atributo da pontuacao" +pont.getAtributo());
-			System.out.println("valor da pontuacao"+pont.getValor().getString());
-		}
-		for (String radocDaListaId : parecer02.getRadocs()) {
-			System.out.println("Radoc "+radocDaListaId);
-		}
-		System.out.println("Fundamentacao "+parecer02.getFundamentacao());
-		
-		
 		
 		parecerDao.persisteParecer(parecer02);
 		
@@ -469,13 +407,11 @@ public class ParecerMongoTest {
 		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
 		Map<String, Valor> valores = new HashMap<String, Valor>();
 
-		
 		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
 			Valor value = new Valor("valor");
 			valores.put(atributo2.getNome(), value);
 		}
 		
-
 		Relato relato = new Relato(tipoID, valores);
 
 		List<Relato> relatos = new ArrayList<Relato>();
@@ -483,7 +419,6 @@ public class ParecerMongoTest {
 		Radoc radoc = new Radoc(radocId, anoBase, relatos);
 
 		parecerDao.persisteRadoc(radoc);
-
 		parecerDao.removeRadoc(radocId);
 		
 	}

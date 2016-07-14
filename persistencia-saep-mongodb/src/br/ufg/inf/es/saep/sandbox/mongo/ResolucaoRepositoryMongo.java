@@ -65,64 +65,52 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 	public Resolucao byId(String id) {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_RESOLUCAO);
 
-		// now use a range query to get a larger subset
-		Block<Document> printBlock = new Block<Document>() {
-			@Override
-			public void apply(final Document document) {
-				System.out.println(document.toJson());
-			}
-		};
-
 		FindIterable<Document> find = collection.find(eq(RESOLUCAO_ID, id));
-		find.forEach(printBlock);
 		if (find == null || find.first() == null || find.first().isEmpty()) {
-			System.out.println("Esse trem não foi encontrado");
 			return null;
 		}
 
-		
-		
-		String resolucaoId  = find.first().getString(RESOLUCAO_ID);
+		String resolucaoId = find.first().getString(RESOLUCAO_ID);
 		String nome = find.first().getString(NOME);
 		String descricao = find.first().getString(DESCRICAO);
 		Date dataAprovacao = find.first().getDate(DATA_APROVACAO);
 		List<Document> regrasDocument = (List<Document>) find.first().get(LISTA_REGRAS);
 		List<Regra> regras = new ArrayList<Regra>();
+
 		for (Document document : regrasDocument) {
 			String variavel = document.getString(VARIAVEL);
 			int tipo = document.getInteger(TIPO_INT);
 			String descricaoDaRegra = document.getString(DESCRICAO);
 			float valorMaximo = Float.parseFloat(document.getString(VALOR_MAXIMO));
-			float valorMinimo =  Float.parseFloat(document.getString(VALOR_MINIMO));
-			
-			
+			float valorMinimo = Float.parseFloat(document.getString(VALOR_MINIMO));
+
 			String entao = "";
 			String senao = "";
 			String expressao = "";
 			String tipoRelato = "";
 			float pontosPorItem = 0;
-			
+
 			List<String> dependeDe = new ArrayList<String>();
-			
+
 			if (tipo == Regra.PONTOS) {
 				tipoRelato = document.getString(TIPO_ID);
 				pontosPorItem = Float.parseFloat(document.getString(PONTOS_POR_ITEM));
 			} else {
 				expressao = document.getString(EXPRESSAO);
-				dependeDe =  (List<String>) document.get(DEPENDE);
+				dependeDe = (List<String>) document.get(DEPENDE);
 			}
+
 			if (tipo == Regra.CONDICIONAL) {
 				entao = document.getString(ENTAO);
 				senao = document.getString(SENAO);
 			}
-			
-			
-			Regra regra = new Regra(variavel, tipo, descricaoDaRegra, valorMaximo, valorMinimo, expressao, entao, senao, tipoRelato, pontosPorItem, dependeDe);
+
+			Regra regra = new Regra(variavel, tipo, descricaoDaRegra, valorMaximo, valorMinimo, expressao, entao, senao,
+					tipoRelato, pontosPorItem, dependeDe);
 
 			regras.add(regra);
-
 		}
-		
+
 		Resolucao resolucao = new Resolucao(resolucaoId, nome, descricao, dataAprovacao, regras);
 
 		return resolucao;
@@ -133,19 +121,13 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_RESOLUCAO);
 
 		Document documento = criarDocumentoDaResolucao(resolucao);
-		
-		if(byId(resolucao.getId()) == null){
+
+		if (byId(resolucao.getId()) == null) {
 			collection.insertOne(documento);
 
-			FindIterable<Document> find = collection.find(documento);
-
-			for (Document document : find) {
-				System.out.println(document.toJson());
-			}
-		}else{
+		} else {
 			throw new IdentificadorExistente(RESOLUCAO_ID);
 		}
-
 
 		return collection.find(documento).first().getString(RESOLUCAO_ID);
 	}
@@ -161,7 +143,6 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		} else {
 			return false;
 		}
-
 	}
 
 	@Override
@@ -172,9 +153,9 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		List<String> resolucoes = new ArrayList<>();
 
 		for (Document document : find) {
-			System.out.println(document.toJson());
 			resolucoes.add(document.getString(RESOLUCAO_ID));
 		}
+
 		return resolucoes;
 	}
 
@@ -182,7 +163,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 	public void persisteTipo(Tipo tipo) {
 		MongoCollection<Document> listaTipos = DataUtil.getMongoDb().getCollection("tipos");
 		Document documento = new Document();
-		if(tipoPeloCodigo(tipo.getId()) == null){
+		if (tipoPeloCodigo(tipo.getId()) == null) {
 			documento.put(TIPO_ID, tipo.getId());
 			documento.put(DESCRICAO, tipo.getDescricao());
 			documento.put(NOME, tipo.getNome());
@@ -190,17 +171,9 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 
 			listaTipos.insertOne(documento);
 
-			FindIterable<Document> find = listaTipos.find(documento);
-
-			for (Document document : find) {
-				System.out.println(document.toJson());
-			}
-		}else{
+		} else {
 			throw new IdentificadorExistente(TIPO_ID);
 		}
-
-		
-
 	}
 
 	public ArrayList<Document> getListaAtributos(Set<Atributo> colecaoAtributo) {
@@ -213,6 +186,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 			documento.put(NOME, atributo.getNome());
 			atributosDocument.add(documento);
 		}
+		
 		return atributosDocument;
 	}
 
@@ -221,33 +195,23 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_TIPO);
 
 		MongoCollection<Document> collectionResolucao = DataUtil.getMongoDb().getCollection(COLECAO_RESOLUCAO);
-		
-		FindIterable<Document> find = collectionResolucao.find(eq(TIPO_ID, codigo));
-		
-		if(find == null || find.first() == null || find.first().isEmpty() ) {
-			collection.deleteOne(eq(TIPO_ID, codigo));
-		}else{
-			throw new ResolucaoUsaTipoException("Alguma resolucao faz referencia a esse tipo: "+TIPO_ID);
-		}
 
+		FindIterable<Document> find = collectionResolucao.find(eq(TIPO_ID, codigo));
+
+		if (find == null || find.first() == null || find.first().isEmpty()) {
+			collection.deleteOne(eq(TIPO_ID, codigo));
+		} else {
+			throw new ResolucaoUsaTipoException("Alguma resolucao faz referencia a esse tipo: " + TIPO_ID);
+		}
 	}
 
 	@Override
 	public Tipo tipoPeloCodigo(String codigo) {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_TIPO);
 
-		// now use a range query to get a larger subset
-		Block<Document> printBlock = new Block<Document>() {
-			@Override
-			public void apply(final Document document) {
-				System.out.println(document.toJson());
-			}
-		};
-
 		FindIterable<Document> find = collection.find(eq(TIPO_ID, codigo));
-		find.forEach(printBlock);
+
 		if (find == null || find.first() == null || find.first().isEmpty()) {
-			System.out.println("Esse trem não foi encontrado");
 			return null;
 		}
 
@@ -262,10 +226,10 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 			int tipoInt = document.getInteger(TIPO_INT);
 			Atributo atr = new Atributo(nomeAtributo, descricaoAtributo, tipoInt);
 			atributos.add(atr);
-
 		}
 
 		Tipo tipo = new Tipo(id, nome, descricao, atributos);
+
 		return tipo;
 	}
 
@@ -273,18 +237,8 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 	public List<Tipo> tiposPeloNome(String nome) {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection("tipos");
 
-		// now use a range query to get a larger subset
-		Block<Document> printBlock = new Block<Document>() {
-			@Override
-			public void apply(final Document document) {
-				System.out.println(document.toJson());
-			}
-		};
-
 		FindIterable<Document> find = collection.find(eq(NOME, nome));
-		find.forEach(printBlock);
 		if (find == null || find.first() == null || find.first().isEmpty()) {
-			System.out.println("Esse trem não foi encontrado");
 			return null;
 		}
 
@@ -304,7 +258,6 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 					int tipoInt = documentAtr.getInteger(TIPO_INT);
 					Atributo atr = new Atributo(nomeAtributo, descricaoAtributo, tipoInt);
 					atributos.add(atr);
-
 				}
 
 				Tipo tipo = new Tipo(id, nome, descricao, atributos);
@@ -315,6 +268,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		find.forEach(tiposBlock);
 
 		return listaTipos;
+
 	}
 
 	public ArrayList<Document> getListaRegras(List<Regra> regras) {
@@ -344,7 +298,6 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		}
 
 		return regrasDocument;
-
 	}
 
 	public Document criarDocumentoDaResolucao(Resolucao resolucao) {

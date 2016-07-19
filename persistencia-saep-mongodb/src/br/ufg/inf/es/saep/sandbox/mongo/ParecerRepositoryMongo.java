@@ -1,6 +1,7 @@
 package br.ufg.inf.es.saep.sandbox.mongo;
 
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Filters.all;
+import static com.mongodb.client.model.Filters.eq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +11,6 @@ import java.util.Map;
 
 import org.bson.Document;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Updates;
@@ -59,7 +59,6 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		MongoCollection<Document> listaPareceres = DataUtil.getMongoDb().getCollection(COLECAO_PARECER);
 
 		Parecer parecer = byId(id);
-
 		parecer.getNotas().add(nota);
 
 		Document documento = criarDocumentoDoParecer(parecer);
@@ -158,6 +157,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 
 		List<Document> notasDocument = (List<Document>) find.first().get(LISTA_NOTAS);
 		List<Nota> notas = new ArrayList<>();
+		
 		for (Document document : notasDocument) {
 
 			Avaliavel origem;
@@ -190,6 +190,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_RADOC);
 
 		FindIterable<Document> find = collection.find(eq(RADOC_ID, identificador));
+		
 		if (find == null || find.first() == null || find.first().isEmpty()) {
 			return null;
 		}
@@ -304,6 +305,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 
 	public ArrayList<Document> getListaRelatos(List<Relato> relatos) {
 		ArrayList<Document> relatosDocument = new ArrayList<Document>();
+		
 		for (Relato relato : relatos) {
 			Document documento = new Document();
 			documento.put(TIPO_ID, relato.getTipo());
@@ -323,6 +325,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		for (Atributo atributo : tipo.getAtributos()) {
 			String nome = atributo.getNome();
 			Valor valor = relato.get(nome);
+			
 			if (valor != null) {
 				documento.put(nome, valor.getString());
 			}
@@ -347,6 +350,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 
 	public Document getAvaliavel(Avaliavel avaliavel) {
 		Document avaliavelDocument = new Document();
+		
 		if (avaliavel instanceof Relato) {
 
 			avaliavelDocument.put(TIPO_ID, ((Relato) avaliavel).getTipo());

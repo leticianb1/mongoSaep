@@ -1,16 +1,11 @@
 package br.ufg.inf.es.saep.sandbox.mongo;
 
-import static com.mongodb.client.model.Filters.all;
 import static com.mongodb.client.model.Filters.eq;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.bson.Document;
@@ -21,19 +16,12 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.DeleteResult;
 
 import br.ufg.inf.es.saep.sandbox.dominio.Atributo;
-import br.ufg.inf.es.saep.sandbox.dominio.ExisteParecerReferenciandoRadoc;
 import br.ufg.inf.es.saep.sandbox.dominio.IdentificadorExistente;
-import br.ufg.inf.es.saep.sandbox.dominio.Nota;
-import br.ufg.inf.es.saep.sandbox.dominio.Parecer;
-import br.ufg.inf.es.saep.sandbox.dominio.Pontuacao;
-import br.ufg.inf.es.saep.sandbox.dominio.Radoc;
 import br.ufg.inf.es.saep.sandbox.dominio.Regra;
-import br.ufg.inf.es.saep.sandbox.dominio.Relato;
 import br.ufg.inf.es.saep.sandbox.dominio.Resolucao;
 import br.ufg.inf.es.saep.sandbox.dominio.ResolucaoRepository;
 import br.ufg.inf.es.saep.sandbox.dominio.ResolucaoUsaTipoException;
 import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
-import br.ufg.inf.es.saep.sandbox.dominio.Valor;
 
 public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 
@@ -66,6 +54,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_RESOLUCAO);
 
 		FindIterable<Document> find = collection.find(eq(RESOLUCAO_ID, id));
+	
 		if (find == null || find.first() == null || find.first().isEmpty()) {
 			return null;
 		}
@@ -163,6 +152,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 	public void persisteTipo(Tipo tipo) {
 		MongoCollection<Document> listaTipos = DataUtil.getMongoDb().getCollection("tipos");
 		Document documento = new Document();
+		
 		if (tipoPeloCodigo(tipo.getId()) == null) {
 			documento.put(TIPO_ID, tipo.getId());
 			documento.put(DESCRICAO, tipo.getDescricao());
@@ -184,6 +174,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 			documento.put(TIPO_INT, atributo.getTipo());
 			documento.put(DESCRICAO, atributo.getDescricao());
 			documento.put(NOME, atributo.getNome());
+			
 			atributosDocument.add(documento);
 		}
 		
@@ -193,7 +184,6 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 	@Override
 	public void removeTipo(String codigo) {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_TIPO);
-
 		MongoCollection<Document> collectionResolucao = DataUtil.getMongoDb().getCollection(COLECAO_RESOLUCAO);
 
 		FindIterable<Document> find = collectionResolucao.find(eq(TIPO_ID, codigo));
@@ -220,6 +210,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		String descricao = find.first().getString(DESCRICAO);
 		List<Document> atributosDocument = (List<Document>) find.first().get(ATRIBUTOS);
 		Set<Atributo> atributos = new HashSet<Atributo>();
+		
 		for (Document document : atributosDocument) {
 			String nomeAtributo = document.getString(NOME);
 			String descricaoAtributo = document.getString(DESCRICAO);
@@ -238,6 +229,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection("tipos");
 
 		FindIterable<Document> find = collection.find(eq(NOME, nome));
+		
 		if (find == null || find.first() == null || find.first().isEmpty()) {
 			return null;
 		}
@@ -252,6 +244,7 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 				String descricao = find.first().getString(DESCRICAO);
 				List<Document> atributosDocument = (List<Document>) find.first().get(ATRIBUTOS);
 				Set<Atributo> atributos = new HashSet<Atributo>();
+				
 				for (Document documentAtr : atributosDocument) {
 					String nomeAtributo = documentAtr.getString(NOME);
 					String descricaoAtributo = documentAtr.getString(DESCRICAO);

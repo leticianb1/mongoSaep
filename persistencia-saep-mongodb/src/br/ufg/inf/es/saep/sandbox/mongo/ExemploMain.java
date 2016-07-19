@@ -1,19 +1,11 @@
 package br.ufg.inf.es.saep.sandbox.mongo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import br.ufg.inf.es.saep.sandbox.dominio.Atributo;
 import br.ufg.inf.es.saep.sandbox.dominio.Nota;
 import br.ufg.inf.es.saep.sandbox.dominio.Parecer;
 import br.ufg.inf.es.saep.sandbox.dominio.Pontuacao;
-import br.ufg.inf.es.saep.sandbox.dominio.Radoc;
-import br.ufg.inf.es.saep.sandbox.dominio.Relato;
-import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
 import br.ufg.inf.es.saep.sandbox.dominio.Valor;
 
 //Para iniciar o serviço do mongo seguir os passos: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/

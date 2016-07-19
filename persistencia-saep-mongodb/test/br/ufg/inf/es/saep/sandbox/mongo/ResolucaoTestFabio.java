@@ -1,29 +1,19 @@
 package br.ufg.inf.es.saep.sandbox.mongo;
 
+import br.ufg.inf.es.saep.sandbox.dominio.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.*;
+
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import br.ufg.inf.es.saep.sandbox.dominio.Atributo;
-import br.ufg.inf.es.saep.sandbox.dominio.Regra;
-import br.ufg.inf.es.saep.sandbox.dominio.Resolucao;
-import br.ufg.inf.es.saep.sandbox.dominio.ResolucaoRepository;
-import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
-
 /**
  * Testes do avaliador de regras
  */
-public class ResolucaoRepositoryTest {
+public class ResolucaoTestFabio {
 
     private static final String REPOSITORIO = "br.ufg.inf.es.saep.sandbox.mongo.ResolucaoRepositoryMongo";
     private ResolucaoRepository repo;
@@ -35,16 +25,16 @@ public class ResolucaoRepositoryTest {
      * Assume que a classe definida por {@link #REPOSITORIO} possui um
      * construtor default (sem argumentos).
      *
-     * @throws ClassNotFoundException Classe n√£o encontrada no classpath.
-     * @throws IllegalAccessException N√£o h√° permiss√£o de acesso √† classe.
-     * @throws InstantiationException Erro durante a cria√ß√£o da inst√¢ncia.
+     * @throws ClassNotFoundException Classe n„o encontrada no classpath.
+     * @throws IllegalAccessException N„o h· permiss„o de acesso ‡ classe.
+     * @throws InstantiationException Erro durante a criaÁ„o da inst‚ncia.
      */
     @Before
     public void setUpClass() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         Class<?> classe = Class.forName(REPOSITORIO);
         repo = (ResolucaoRepository)classe.newInstance();
 
-        // Vari√°veis utilit√°rias para simplifica√ß√£o da montagem de testes.
+        // Vari·veis utilit·rias para simplificaÁ„o da montagem de testes.
         dependencias = new ArrayList<>();
         regra = new Regra("v", Regra.PONTOS, "pontos", 10, 0, null, null, null, "t", 1, dependencias);
         regras = new ArrayList<>();
@@ -59,33 +49,33 @@ public class ResolucaoRepositoryTest {
     @Test
     public void recuperaResolucaoInserida() {
         List<String> dd = new ArrayList<>();
-        Regra regra = new Regra("pontos", Regra.PONTOS, "pontos", 10, 0,  null, null, null, "p", 1, dd);
+        Regra regra = new Regra("p", Regra.PONTOS, "pontos", 10, 0, null, null, null, "t", 1, dd);
         List<Regra> regras = new ArrayList<>();
         regras.add(regra);
-        Resolucao r = new Resolucao("r", "nome", "resolu√ß√£o r", new Date(), regras);
+        Resolucao r = new Resolucao("r", "nome", "resoluÁ„o r", new Date(), regras);
 
         assertEquals("r", repo.persiste(r));
 
         Resolucao recuperada = repo.byId("r");
         assertEquals(r, recuperada);
-        assertEquals("resolu√ß√£o r", recuperada.getDescricao());
+        assertEquals("resoluÁ„o r", recuperada.getDescricao());
     }
 
     @Test
     public void resolucaoRemovidaNaoPodeSerRecuperada() {
         String id = UUID.randomUUID().toString();
-        Resolucao r = new Resolucao(id, "regra r", "resolu√ß√£o r", new Date(), regras);
+        Resolucao r = new Resolucao(id, "regra r", "resoluÁ„o r", new Date(), regras);
 
         assertEquals(id, repo.persiste(r));
 
-        // resolu√ß√£o inserida est√° dispon√≠vel
+        // resoluÁ„o inserida est· disponÌvel
         assertEquals(1, repo.resolucoes().size());
 
         assertTrue(repo.remove(id));
 
         assertNull(repo.byId("r"));
 
-        // ap√≥s remo√ß√£o, nenhuma resolu√ß√£o est√° dispon√≠vel
+        // apÛs remoÁ„o, nenhuma resoluÁ„o est· disponÌvel
         assertEquals(0, repo.resolucoes().size());
     }
 

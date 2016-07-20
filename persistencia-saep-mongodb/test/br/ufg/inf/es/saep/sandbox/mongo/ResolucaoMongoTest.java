@@ -18,7 +18,9 @@ import br.ufg.inf.es.saep.sandbox.dominio.Regra;
 import br.ufg.inf.es.saep.sandbox.dominio.Resolucao;
 import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
 
-
+/**
+ * Testes da classe de implementação (ResolucaoRepositoryMongo) de ResolucaoRepository
+ */
 public class ResolucaoMongoTest {
 
 		private static List<Regra> regras;
@@ -30,7 +32,7 @@ public class ResolucaoMongoTest {
 		public void setUp(){
 			parecerDao = new ParecerRepositoryMongo();
 			resolucaoDao = new ResolucaoRepositoryMongo();
-				
+			DataUtil.getMongoTest().drop();	
 			Regra r = new Regra("v", 1, "d", 1, 0, "a", null, null, null, 1, new ArrayList<String>());
 	        regras = new ArrayList<>();
 	        regras.add(r);

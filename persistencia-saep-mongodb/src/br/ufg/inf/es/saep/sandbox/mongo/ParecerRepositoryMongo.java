@@ -1,6 +1,7 @@
 package br.ufg.inf.es.saep.sandbox.mongo;
 
-import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Filters.all;
+import static com.mongodb.client.model.Filters.eq;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +11,6 @@ import java.util.Map;
 
 import org.bson.Document;
 
-import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Updates;
@@ -26,9 +26,17 @@ import br.ufg.inf.es.saep.sandbox.dominio.ParecerRepository;
 import br.ufg.inf.es.saep.sandbox.dominio.Pontuacao;
 import br.ufg.inf.es.saep.sandbox.dominio.Radoc;
 import br.ufg.inf.es.saep.sandbox.dominio.Relato;
+import br.ufg.inf.es.saep.sandbox.dominio.Resolucao;
 import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
 import br.ufg.inf.es.saep.sandbox.dominio.Valor;
 
+/**
+ * Classe que implementa a interface de ParecerRepository para o uso do MongoDB para armazenamento dos dados
+ * Além dos métodos da interface, métodos de apoio foram criados para facilitar a transição de instancias das Classes de Domínio do SAEP
+ * para classes de Document que são usadas para persistência na base de dados do Mongo
+ *
+ * @see ParecerRepository
+ */
 public class ParecerRepositoryMongo implements ParecerRepository {
 
 	static String COLECAO_PARECER = "pareceres";
@@ -59,7 +67,6 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		MongoCollection<Document> listaPareceres = DataUtil.getMongoDb().getCollection(COLECAO_PARECER);
 
 		Parecer parecer = byId(id);
-
 		parecer.getNotas().add(nota);
 
 		Document documento = criarDocumentoDoParecer(parecer);
@@ -158,6 +165,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 
 		List<Document> notasDocument = (List<Document>) find.first().get(LISTA_NOTAS);
 		List<Nota> notas = new ArrayList<>();
+		
 		for (Document document : notasDocument) {
 
 			Avaliavel origem;
@@ -190,6 +198,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_RADOC);
 
 		FindIterable<Document> find = collection.find(eq(RADOC_ID, identificador));
+		
 		if (find == null || find.first() == null || find.first().isEmpty()) {
 			return null;
 		}
@@ -252,7 +261,16 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		}
 	}
 
-	public Document criarDocumentoDoParecer(Parecer parecer) {
+	
+    /**
+     * Monta um documento do MongoDB (Document) com os atributos do parecer passado como parametro
+     *
+     * @param parecer O objeto da classe Parecer instanciado para ser salvo no formato de documento
+     *
+     * @return o documento no formato esperado 
+     */
+	
+	private Document criarDocumentoDoParecer(Parecer parecer) {
 		Document documento = new Document();
 		documento.put(PARECER_ID, parecer.getId());
 		documento.put(RESOLUCAO_ID, parecer.getResolucao());
@@ -264,7 +282,17 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		return documento;
 	}
 
-	public Avaliavel getAvaliavel(Document avaliavelDocument) {
+    /**
+     * Monta o objeto da classe Avaliavel a partir de um objeto no formato de documento (Document) recuperado do banco.
+     * Como Avaliavel é uma interface, há uma verificação de qual classe é o documento a partir da presença da propriedade "tipoId"
+     * que só existe em objetos da classe Relato 
+     *
+     * @param avaliavelDocument O objeto da classe Document para ser instanciado como Avaliavel
+     *
+     * @return um objeto da classe Avaliavel (Relato ou Pontuacao)
+     */
+	
+	private Avaliavel getAvaliavel(Document avaliavelDocument) {
 		if (avaliavelDocument.containsKey(TIPO_ID)) {
 			String tipo = avaliavelDocument.getString(TIPO_ID);
 			List<Document> valoresDocument = (List<Document>) avaliavelDocument.get(LISTA_VALORES);
@@ -287,8 +315,15 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 			return pontuacao;
 		}
 	}
-
-	public ArrayList<Document> getListaPontuacoes(List<Pontuacao> pontuacoes) {
+	
+    /**
+     * Monta uma lista de documentos do MongoDB a partir de uma lista de pontuacoes passada
+     *
+     * @param pontuacoes Uma lista de pontuacoes (lista de objetos Pontuacao)
+     *
+     * @return uma lista de Document correspondente a lista de Pontuacao passada
+     */
+	private ArrayList<Document> getListaPontuacoes(List<Pontuacao> pontuacoes) {
 
 		ArrayList<Document> pontuacoesDocument = new ArrayList<Document>();
 
@@ -302,8 +337,16 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		return pontuacoesDocument;
 	}
 
-	public ArrayList<Document> getListaRelatos(List<Relato> relatos) {
+    /**
+     * Monta uma lista de documentos do MongoDB a partir de uma lista de relatos passada
+     *
+     * @param relatos Uma lista de relatos (lista de objetos Relato)
+     *
+     * @return uma lista de Document correspondente a lista de Relato passada
+     */
+	private ArrayList<Document> getListaRelatos(List<Relato> relatos) {
 		ArrayList<Document> relatosDocument = new ArrayList<Document>();
+		
 		for (Relato relato : relatos) {
 			Document documento = new Document();
 			documento.put(TIPO_ID, relato.getTipo());
@@ -313,8 +356,15 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 
 		return relatosDocument;
 	}
-
-	public Document getListaValores(Relato relato) {
+   /**
+    * Monta um documento do MongoDB (Document) a partir de um objeto da classe Relato. Como na classe de domínio Relato não há um 
+    * método para recuperar a lsita de todos os atributos, essa lista é obtida a partir da lista de atributos do tipo correspondente
+    *
+    * @param relato Um objeto da classe Relato
+    *
+    * @return um Document correspondente ao Relato passado
+    */
+	private Document getListaValores(Relato relato) {
 		ArrayList<Document> relatosDocument = new ArrayList<Document>();
 		ResolucaoRepositoryMongo resolucaoDao = new ResolucaoRepositoryMongo();
 		Document documento = new Document();
@@ -323,6 +373,7 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		for (Atributo atributo : tipo.getAtributos()) {
 			String nome = atributo.getNome();
 			Valor valor = relato.get(nome);
+			
 			if (valor != null) {
 				documento.put(nome, valor.getString());
 			}
@@ -331,7 +382,14 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		return documento;
 	}
 
-	public ArrayList<Document> getListaNota(List<Nota> notas) {
+    /**
+     * Monta uma lista de documentos do MongoDB a partir de uma lista de notas passada
+     *
+     * @param notas Uma lista de notas (lista de objetos Nota)
+     *
+     * @return uma lista de Document correspondente a lista de Nota passada
+     */
+	private ArrayList<Document> getListaNota(List<Nota> notas) {
 		ArrayList<Document> notasDocument = new ArrayList<Document>();
 
 		for (Nota nota : notas) {
@@ -344,9 +402,19 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 
 		return notasDocument;
 	}
-
-	public Document getAvaliavel(Avaliavel avaliavel) {
+    /**
+     * Monta o documento a partir de um objeto classe Avaliavel passado no parametro.
+     * Como Avaliavel é uma interface, há uma verificação de qual classe o objeto é uma instância 
+     *
+     * @param avaliavel O objeto da classe Avaliavel usado para montagem do documento
+     *
+     * @return um objeto Document com informações do objeto passado
+     * 
+     * @see getAvaliavel(Document avaliavelDocument)
+     */
+	private Document getAvaliavel(Avaliavel avaliavel) {
 		Document avaliavelDocument = new Document();
+		
 		if (avaliavel instanceof Relato) {
 
 			avaliavelDocument.put(TIPO_ID, ((Relato) avaliavel).getTipo());
@@ -360,19 +428,5 @@ public class ParecerRepositoryMongo implements ParecerRepository {
 		}
 
 		return avaliavelDocument;
-	}
-
-	public ArrayList<Document> getMapRelato(Map<String, Valor> mapaRelato) {
-
-		ArrayList<Document> mapaRelatoDocument = new ArrayList<Document>();
-
-		for (String mapKey : mapaRelato.keySet()) {
-			Document documento = new Document();
-			documento.put(mapKey, mapaRelato.get(mapKey).getString());
-			mapaRelatoDocument.add(documento);
-
-		}
-
-		return mapaRelatoDocument;
 	}
 }

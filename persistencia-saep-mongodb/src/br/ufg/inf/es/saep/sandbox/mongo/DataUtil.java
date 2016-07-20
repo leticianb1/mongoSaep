@@ -24,16 +24,6 @@ public class DataUtil {
 		return  mongoClient.getDatabase(getProperties("mongo.database"));
 	}
     /**
-     * Recupera o banco de dados criado para realização dos testes.
-     *
-     * @return o banco de dados correspondente ao nome, de acordo com o endereço usado. Caso não exista, o MongoDB cria a base de dados automaticamente
-     */
-	public static MongoDatabase getMongoTest(){
-		MongoClient mongoClient = new MongoClient(getProperties("mongo.url"), Integer.parseInt(getProperties("mongo.port")));
-
-		return  mongoClient.getDatabase(getProperties("mongo.database.test"));
-	}
-    /**
      * Método para auxiliar a recuperação de propriedades do documento de configurações criado
      * @param name Nome da propriedade esperada
      *

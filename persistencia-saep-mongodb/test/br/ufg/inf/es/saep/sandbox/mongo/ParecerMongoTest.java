@@ -48,7 +48,7 @@ public class ParecerMongoTest {
 	public  static void setUp(){
 		parecerDao = new ParecerRepositoryMongo();
 		resolucaoDao = new ResolucaoRepositoryMongo();
-		DataUtil.getMongoTest().drop();
+		DataUtil.getMongoDb().drop();
 		resolucaoDao.persisteTipo(montarTipo(tipoDocente));
 		resolucaoDao.persisteTipo(montarTipo(tipoPesquisa));
 	} 

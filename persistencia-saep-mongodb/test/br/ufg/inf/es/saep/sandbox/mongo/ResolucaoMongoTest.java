@@ -32,7 +32,7 @@ public class ResolucaoMongoTest {
 		public void setUp(){
 			parecerDao = new ParecerRepositoryMongo();
 			resolucaoDao = new ResolucaoRepositoryMongo();
-			DataUtil.getMongoTest().drop();	
+			DataUtil.getMongoDb().drop();	
 			Regra r = new Regra("v", 1, "d", 1, 0, "a", null, null, null, 1, new ArrayList<String>());
 	        regras = new ArrayList<>();
 	        regras.add(r);

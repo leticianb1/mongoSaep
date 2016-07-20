@@ -23,6 +23,13 @@ import br.ufg.inf.es.saep.sandbox.dominio.ResolucaoRepository;
 import br.ufg.inf.es.saep.sandbox.dominio.ResolucaoUsaTipoException;
 import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
 
+/**
+ * Classe que implementa a interface de ResolucaoRepository para o uso do MongoDB para armazenamento dos dados
+ * Além dos métodos da interface, métodos de apoio foram criados para facilitar a transição de instancias das Classes de Domínio do SAEP
+ * para classes de Document que são usadas para persistência na base de dados do Mongo
+ *
+ * @see ResolucaoRepository
+ */
 public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 
 	static String COLECAO_RESOLUCAO = "resolucoes";
@@ -166,21 +173,6 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		}
 	}
 
-	public ArrayList<Document> getListaAtributos(Set<Atributo> colecaoAtributo) {
-		ArrayList<Document> atributosDocument = new ArrayList<Document>();
-
-		for (Atributo atributo : colecaoAtributo) {
-			Document documento = new Document();
-			documento.put(TIPO_INT, atributo.getTipo());
-			documento.put(DESCRICAO, atributo.getDescricao());
-			documento.put(NOME, atributo.getNome());
-			
-			atributosDocument.add(documento);
-		}
-		
-		return atributosDocument;
-	}
-
 	@Override
 	public void removeTipo(String codigo) {
 		MongoCollection<Document> collection = DataUtil.getMongoDb().getCollection(COLECAO_TIPO);
@@ -263,8 +255,16 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		return listaTipos;
 
 	}
-
-	public ArrayList<Document> getListaRegras(List<Regra> regras) {
+    /**
+     * Monta uma lista de documentos do MongoDB a partir de uma lista de regras passada
+     * Para criação das propriedades do documento são levadas em consideração as restrições de propriedades da classe Regra,
+     * de acordo com o tipo de Regra definido
+     * Para criar cada documento, cada propriedade de Regra é salva no formato de "nomeDoCampo": "valor", semelhante a documentos Json
+     * @param regras Uma lista de Regras (lista de objetos Regra)
+     *
+     * @return uma lista de Document correspondente a lista de Regra passada
+     */
+	private ArrayList<Document> getListaRegras(List<Regra> regras) {
 		ArrayList<Document> regrasDocument = new ArrayList<Document>();
 
 		for (Regra regra : regras) {
@@ -293,7 +293,14 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		return regrasDocument;
 	}
 
-	public Document criarDocumentoDaResolucao(Resolucao resolucao) {
+    /**
+     * Monta um documento do MongoDB a partir do objeto instanciado de Resolucao
+     * Para criar o documento, cada propriedade de Resolucao é salva no formato de "nomeDoCampo": "valor", semelhante a documentos Json
+     * @param resolucao Um objeto de resolucao instanciado
+     *
+     * @return uma objeto Document correspondente (com os atributos de) ao objeto Resolucao recebido como parametro
+     */
+	private Document criarDocumentoDaResolucao(Resolucao resolucao) {
 		Document documento = new Document();
 		documento.put(RESOLUCAO_ID, resolucao.getId());
 		documento.put(NOME, resolucao.getNome());
@@ -302,5 +309,27 @@ public class ResolucaoRepositoryMongo implements ResolucaoRepository {
 		documento.append(LISTA_REGRAS, getListaRegras(resolucao.getRegras()));
 
 		return documento;
+	}
+	
+    /**
+     * Monta uma lista de documentos do MongoDB a partir de um conjunto (Set) de atributos passada
+     * Para criar o documento, cada propriedade de Atributo é salva no formato de "nomeDoCampo": "valor", semelhante a documentos Json
+     * @param regras Um conjunto de atributos (Set de objetos Atributo)
+     *
+     * @return uma lista de Document correspondente ao conjunto de Atributo
+     */
+	private ArrayList<Document> getListaAtributos(Set<Atributo> colecaoAtributo) {
+		ArrayList<Document> atributosDocument = new ArrayList<Document>();
+
+		for (Atributo atributo : colecaoAtributo) {
+			Document documento = new Document();
+			documento.put(TIPO_INT, atributo.getTipo());
+			documento.put(DESCRICAO, atributo.getDescricao());
+			documento.put(NOME, atributo.getNome());
+			
+			atributosDocument.add(documento);
+		}
+		
+		return atributosDocument;
 	}
 }

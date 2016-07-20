@@ -1,6 +1,9 @@
 package br.ufg.inf.es.saep.sandbox.mongo;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import br.ufg.inf.es.saep.sandbox.dominio.Atributo;
@@ -24,145 +27,65 @@ import br.ufg.inf.es.saep.sandbox.dominio.Radoc;
 import br.ufg.inf.es.saep.sandbox.dominio.Relato;
 import br.ufg.inf.es.saep.sandbox.dominio.Tipo;
 import br.ufg.inf.es.saep.sandbox.dominio.Valor;
-
-import org.junit.Assert;
-import org.junit.Assert.*;
-
+/**
+ * Testes da classe de implementação (ParecerRepositoryMongo) de ParecerRepository
+ */
 public class ParecerMongoTest {
-	ParecerRepositoryMongo parecerDao;
-	ResolucaoRepositoryMongo resolucaoDao;
+	static ParecerRepositoryMongo parecerDao;
+	static ResolucaoRepositoryMongo resolucaoDao;
 	
+	static String atributoNome = "nome";
+	static String atributoCarga = "cargaHoraria";
+	static String atributoTrabalho = "trabalho";
+	static String atributoPagina = "paginas";
+	static String tipoDocente = "docente";
+	static String tipoPesquisa = "pesquisa";
+	static String idRadoc = "radoc1";
+	static String idParecer = "parecer1";
+	static String idResolucao = "resolucao1";
 	
-	@Before
-	public void setUp(){
+	@BeforeClass
+	public  static void setUp(){
 		parecerDao = new ParecerRepositoryMongo();
 		resolucaoDao = new ResolucaoRepositoryMongo();
+		DataUtil.getMongoTest().drop();
+		resolucaoDao.persisteTipo(montarTipo(tipoDocente));
+		resolucaoDao.persisteTipo(montarTipo(tipoPesquisa));
 	} 
 	
 	@Test
 	public void persisteParecerDadosValidos(){
-		String parecerId  = "12";
-		String resolucaoId = "resolucao2013";
+		Parecer parecer = montarParecer("01");
+		parecerDao.persisteParecer(parecer);
 		
-		String radocId = "radoc da lets";
-		List<String> radocsIds = new ArrayList<String>();
-		radocsIds.add(radocId);
 		
-		String atributoPontuado = "nome";
-		
-		String valorPontuado = "3256";
-		Valor valor = new Valor(valorPontuado);
-		Pontuacao pontuacao = new Pontuacao(atributoPontuado, valor);
-		
-		List<Pontuacao> pontuacoes = new ArrayList<Pontuacao>();
-		pontuacoes.add(pontuacao);
-		
-		String fundamentacao = "Gostei e pontuei";
-		
-		List<Nota> notas = new ArrayList<>();
-		
-		Pontuacao pontuacaoModificada = new Pontuacao(atributoPontuado, new Valor("Leticia Nunes"));
-		Nota nota = new Nota(pontuacao, pontuacaoModificada, "Q tipo de nome é 3256:");
-		notas.add(nota);
-		
-		Parecer parecer02 = new Parecer(parecerId, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-
-		parecerDao.persisteParecer(parecer02);
-		
-		assertNotNull(parecerDao.byId(parecerId));
+		assertNotNull(parecerDao.byId(parecer.getId()));
 	}
 	
-	@Test(expected=IdentificadorDesconhecido.class)
-	public void persisteParecerSemId(){
-		String id  ="12";
-		String resolucaoId = "";
-		
-		String radocId = "radoc da lets";
-		List<String> radocsIds = new ArrayList<String>();
-		radocsIds.add(radocId);
-		
-		String atributoPontuado = "nome";
-		
-		String valorPontuado = "3256";
-		Valor valor = new Valor(valorPontuado);
-		Pontuacao pontuacao = new Pontuacao(atributoPontuado, valor);
-		
-		List<Pontuacao> pontuacoes = new ArrayList<Pontuacao>();
-		pontuacoes.add(pontuacao);
-		
-		String fundamentacao = "Gostei e pontuei";
-		
-		List<Nota> notas = new ArrayList<>();
-		
-		Pontuacao pontuacaoModificada = new Pontuacao(atributoPontuado, new Valor("Leticia Nunes"));
-		Nota nota = new Nota(pontuacao, pontuacaoModificada, "Q tipo de nome é 3256:");
-		notas.add(nota);
-		
-		Parecer parecer02 = new Parecer(id, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-		
-		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
-		
-		parecerDao.persisteParecer(parecer02);
-		
-	}
 	
 	@Test (expected=IdentificadorExistente.class)
 	public void persisteParecerComIdExistenteNaBase(){
-		String id  = "12";
-		String resolucaoId = "13";
-		
-		String radocId = "radoc da lets";
-		List<String> radocsIds = new ArrayList<String>();
-		radocsIds.add(radocId);
-		
-		String atributoPontuado = "nome";
-		
-		String valorPontuado = "3256";
-		Valor valor = new Valor(valorPontuado);
-		Pontuacao pontuacao = new Pontuacao(atributoPontuado, valor);
-		
-		List<Pontuacao> pontuacoes = new ArrayList<Pontuacao>();
-		pontuacoes.add(pontuacao);
-		
-		String fundamentacao = "Gostei e pontuei";
-		
-		List<Nota> notas = new ArrayList<>();
-		
-		Pontuacao pontuacaoModificada = new Pontuacao(atributoPontuado, new Valor("Leticia Nunes"));
-		Nota nota = new Nota(pontuacao, pontuacaoModificada, "Q tipo de nome é 3256:");
-		notas.add(nota);
-		
-		Parecer parecer02 = new Parecer(id, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-		
-		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
-		
-		parecerDao.persisteParecer(parecer02);
-		
-		parecerDao.persisteParecer(parecer02);
-		
+		Parecer parecer = montarParecer("02");
+
+		parecerDao.persisteParecer(parecer);
+		parecerDao.persisteParecer(parecer);
 	}
 	
 	@Test
 	public void adicionaNotaDadosValidos(){
-		String parecerId  = "12";
+		Parecer parecer = montarParecer("04");
+		parecerDao.persisteParecer(parecer);
 		
-		String atributoPontuado = "nome";
-		 int tamanhoAntes = 0;
-		 int tamanhoDepois = 0;
-		String valorPontuado = "3256";
-		Valor valor = new Valor(valorPontuado);
-		Pontuacao pontuacao = new Pontuacao(atributoPontuado, valor);
+		Nota nota = montarNotas(atributoTrabalho).iterator().next();
 		
-		
-		Pontuacao pontuacaoModificada = new Pontuacao(atributoPontuado, new Valor("Leticia Nunes"));
-		Nota nota = new Nota(pontuacao, pontuacaoModificada, "Q tipo de nome é 3256:");
+		int tamanhoAntes = 0;
+		int tamanhoDepois = 0;
 
+		tamanhoAntes = parecerDao.byId(parecer.getId()).getNotas().size();
 		
-		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
+		parecerDao.adicionaNota(parecer.getId(), nota);
 		
-		tamanhoAntes = parecerDao.byId(parecerId).getNotas().size();
-		parecerDao.adicionaNota(parecerId, nota);
-		tamanhoDepois = parecerDao.byId(parecerId).getNotas().size();
+		tamanhoDepois = parecerDao.byId(parecer.getId()).getNotas().size();
 		
 		assertNotEquals(tamanhoAntes, tamanhoDepois);
 	}
@@ -171,256 +94,178 @@ public class ParecerMongoTest {
 	public void adicionaNotaEmParecerDesconhecido(){
 		String parecerId = "abcdef";
 		
-		String atributoPontuado = "nome";
-		
-		String valorPontuado = "3256";
-		Valor valor = new Valor(valorPontuado);
-		Pontuacao pontuacao = new Pontuacao(atributoPontuado, valor);
-		
-		Pontuacao pontuacaoModificada = new Pontuacao(atributoPontuado, new Valor("Leticia Nunes"));
-		Nota nota = new Nota(pontuacao, pontuacaoModificada, "Q tipo de nome é 3256:");
-
-		
-		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
+		Nota nota = montarNotas(atributoNome).iterator().next();
 		
 		parecerDao.adicionaNota(parecerId, nota);
 	}
 	
 	@Test
 	public void removeNotaDadosValidos(){
-		String parecerId = "12";
+		Parecer parecer = montarParecer("05");
+		parecerDao.persisteParecer(parecer);
 		
-		String atributoPontuado = "nome";
-		 int tamanhoAntes = 0;
-		 int tamanhoDepois = 0;
-		String valorPontuado = "3256";
-		Valor valor = new Valor(valorPontuado);
-		Pontuacao pontuacao = new Pontuacao(atributoPontuado, valor);
+		Nota nota = montarNotas(atributoCarga).iterator().next();
 		
-		Pontuacao pontuacaoModificada = new Pontuacao(atributoPontuado, new Valor("Leticia Nunes"));
-		Nota nota = new Nota(pontuacao, pontuacaoModificada, "Q tipo de nome é 3256:");
-			
-		ParecerRepositoryMongo parecerDao = new ParecerRepositoryMongo();
-		parecerDao.adicionaNota(parecerId, nota);
+		parecerDao.adicionaNota(parecer.getId(), nota);
 		
-		tamanhoAntes = parecerDao.byId(parecerId).getNotas().size();
-		parecerDao.removeNota(parecerId, pontuacao);
-		tamanhoDepois = parecerDao.byId(parecerId).getNotas().size();
+		
+		int tamanhoAntes = 0;
+		int tamanhoDepois = 0;
+
+		tamanhoAntes = parecerDao.byId(parecer.getId()).getNotas().size();
+		
+		parecerDao.removeNota(parecer.getId(), nota.getItemOriginal());
+		
+		tamanhoDepois = parecerDao.byId(parecer.getId()).getNotas().size();
 		
 		assertNotEquals(tamanhoAntes, tamanhoDepois);
 	}
 	
 	@Test (expected=IdentificadorDesconhecido.class)
 	public void atualizaFundamentacaoEmParecerDesconhecido(){
-		String parecerId = "abcdef";
+		Parecer parecer = montarParecer("abcdf");
 		
 		String fundamentacao = "pq sim";
 		
-		parecerDao.atualizaFundamentacao(parecerId, fundamentacao);
+		parecerDao.atualizaFundamentacao(parecer.getId(), fundamentacao);
 	}
 	
 	@Test
 	public void atualizaFundamentacaoDadosValidos(){
-		String parecerId = "12";
+		Parecer parecer = montarParecer("06");
+		parecerDao.persisteParecer(parecer);
 		
-		String fundamentacao = "oi";
+		String fundamentacao = "pq sim";
 		
-		parecerDao.atualizaFundamentacao(parecerId, fundamentacao);
+		parecerDao.atualizaFundamentacao(parecer.getId(), fundamentacao);
 		
-		assertEquals(parecerDao.byId(parecerId).getFundamentacao(), fundamentacao);		
+		assertEquals(parecerDao.byId(parecer.getId()).getFundamentacao(), fundamentacao);		
 	}
 	
 	@Test (expected=CampoExigidoNaoFornecido.class)
 	public void persisteRadocSemId(){
+		Radoc radoc =  montarRadoc("");
 		
-		String tipoId = "01";
-		Set<Atributo> atributos = new HashSet<Atributo>();
-		Atributo atributo = new Atributo("nome", "qualquer coisa", 2);
-		atributos.add(atributo);
-		atributo = new Atributo("cargaHoraria", "hrs", 2);
-		atributos.add(atributo);
-
-		Tipo tipo = new Tipo(tipoId, "docente", "atributos do docente", atributos);
-		resolucaoDao.persisteTipo(tipo);
-
-		int anoBase = 2005;
-		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
-		Map<String, Valor> valores = new HashMap<String, Valor>();
-
-		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
-			Valor value = new Valor("valor");
-			valores.put(atributo2.getNome(), value);
-		}
-		
-		Relato relato = new Relato(tipoID, valores);
-
-		List<Relato> relatos = new ArrayList<Relato>();
-		relatos.add(relato);
-		String radocId = "";
-		Radoc radoc = new Radoc(radocId, anoBase, relatos);
-
 		parecerDao.persisteRadoc(radoc);
 	}
 	
 	@Test (expected=IdentificadorExistente.class)
 	public void persisteRadocComIdExistenteNaBase(){
-		String tipoId = "01";
-		Set<Atributo> atributos = new HashSet<Atributo>();
-		Atributo atributo = new Atributo("nome", "qualquer coisa", 2);
-		atributos.add(atributo);
-		atributo = new Atributo("cargaHoraria", "hrs", 2);
-		atributos.add(atributo);
-
-		Tipo tipo = new Tipo(tipoId, "docente", "atributos do docente", atributos);
-		resolucaoDao.persisteTipo(tipo);
-
-		int anoBase = 2005;
-		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
-		Map<String, Valor> valores = new HashMap<String, Valor>();
-
-		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
-			Valor value = new Valor("valor");
-			valores.put(atributo2.getNome(), value);
-		}
+		Radoc radoc =  montarRadoc("01");
 		
-		Relato relato = new Relato(tipoID, valores);
-
-		List<Relato> relatos = new ArrayList<Relato>();
-		relatos.add(relato);
-		String radocId = "13";
-		Radoc radoc = new Radoc(radocId, anoBase, relatos);
-
 		parecerDao.persisteRadoc(radoc);
+
 		parecerDao.persisteRadoc(radoc);
 	}
 	
 	@Test 
 	public void persisteRadocComDadosValidos(){
+		Radoc radoc =  montarRadoc("02");
 		
-		String tipoId = "01";
-		Set<Atributo> atributos = new HashSet<Atributo>();
-		Atributo atributo = new Atributo("nome", "qualquer coisa", 2);
-		atributos.add(atributo);
-		atributo = new Atributo("cargaHoraria", "hrs", 2);
-		atributos.add(atributo);
-
-		Tipo tipo = new Tipo(tipoId, "docente", "atributos do docente", atributos);
-		resolucaoDao.persisteTipo(tipo);
-
-		int anoBase = 2005;
-		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
-		Map<String, Valor> valores = new HashMap<String, Valor>();
-
-		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
-			Valor value = new Valor("valor");
-			valores.put(atributo2.getNome(), value);
-		}
-		
-		Relato relato = new Relato(tipoID, valores);
-
-		List<Relato> relatos = new ArrayList<Relato>();
-		relatos.add(relato);
-		String radocId = "17";
-		Radoc radoc = new Radoc(radocId, anoBase, relatos);
-
 		parecerDao.persisteRadoc(radoc);
 		
-		assertNotNull(parecerDao.radocById(radocId));
+		
+		assertNotNull(parecerDao.radocById(radoc.getId()));
 	}
 	
 	@Test 
 	public void deletaRadocComDadosValidos(){
+		Radoc radoc =  montarRadoc("deletar");
 		
-		String tipoId = "01";
-		Set<Atributo> atributos = new HashSet<Atributo>();
-		Atributo atributo = new Atributo("nome", "qualquer coisa", 2);
-		atributos.add(atributo);
-		atributo = new Atributo("cargaHoraria", "hrs", 2);
-		atributos.add(atributo);
-
-		Tipo tipo = new Tipo(tipoId, "docente", "atributos do docente", atributos);
-		resolucaoDao.persisteTipo(tipo);
-
-		int anoBase = 2005;
-		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
-		Map<String, Valor> valores = new HashMap<String, Valor>();
-
-		
-		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
-			Valor value = new Valor("valor");
-			valores.put(atributo2.getNome(), value);
-		}
-		
-		Relato relato = new Relato(tipoID, valores);
-
-		List<Relato> relatos = new ArrayList<Relato>();
-		relatos.add(relato);
-		String radocId = "17";
-		Radoc radoc = new Radoc(radocId, anoBase, relatos);
-
 		parecerDao.persisteRadoc(radoc);
 		
-		assertNotNull(parecerDao.radocById(radocId));
+		parecerDao.removeRadoc(radoc.getId());
+		
+		assertNull(parecerDao.radocById(radoc.getId()));
 	}
 	
 	@Test (expected=ExisteParecerReferenciandoRadoc.class)
 	public void deletaRadocReferenciado(){
-		String parecerId  = "58";
-		String resolucaoId = "resolucao2013";
+		ArrayList<String> radocs = new ArrayList<String>();
+		radocs.add("radocReferenciado");
 		
-		String radocId = "radoc da lets 2";
-		List<String> radocsIds = new ArrayList<String>();
-		radocsIds.add(radocId);
-		
-		String atributoPontuado = "nome";
-		
-		String valorPontuado = "3256";
-		Valor valor = new Valor(valorPontuado);
-		Pontuacao pontuacao = new Pontuacao(atributoPontuado, valor);
-		
-		List<Pontuacao> pontuacoes = new ArrayList<Pontuacao>();
-		pontuacoes.add(pontuacao);
-		
-		String fundamentacao = "Gostei e pontuei";
-		
-		List<Nota> notas = new ArrayList<>();
-		
-		Pontuacao pontuacaoModificada = new Pontuacao(atributoPontuado, new Valor("Leticia Nunes"));
-		Nota nota = new Nota(pontuacao, pontuacaoModificada, "Q tipo de nome é 3256:");
-		notas.add(nota);
-		
-		Parecer parecer02 = new Parecer(parecerId, resolucaoId, radocsIds, pontuacoes, fundamentacao, notas);
-		
-		parecerDao.persisteParecer(parecer02);
-		
-		String tipoId = "01";
-		Set<Atributo> atributos = new HashSet<Atributo>();
-		Atributo atributo = new Atributo("nome", "qualquer coisa", 2);
-		atributos.add(atributo);
-		atributo = new Atributo("cargaHoraria", "hrs", 2);
-		atributos.add(atributo);
+		Parecer parecer = new Parecer("parecerComRadoc", idResolucao, radocs, montarPontuacoes(), "algo", montarNotas(atributoNome));
+		parecerDao.persisteParecer(parecer);
 
-		Tipo tipo = new Tipo(tipoId, "docente", "atributos do docente", atributos);
-		resolucaoDao.persisteTipo(tipo);
-
-		int anoBase = 2005;
-		String tipoID = resolucaoDao.tipoPeloCodigo(tipoId).getId();
-		Map<String, Valor> valores = new HashMap<String, Valor>();
-
-		for (Atributo atributo2 : resolucaoDao.tipoPeloCodigo(tipoId).getAtributos()) {
-			Valor value = new Valor("valor");
-			valores.put(atributo2.getNome(), value);
-		}
+		Radoc radoc =  montarRadoc("radocReferenciado");
 		
-		Relato relato = new Relato(tipoID, valores);
-
-		List<Relato> relatos = new ArrayList<Relato>();
-		relatos.add(relato);
-		Radoc radoc = new Radoc(radocId, anoBase, relatos);
-
 		parecerDao.persisteRadoc(radoc);
-		parecerDao.removeRadoc(radocId);
+		
+		parecerDao.removeRadoc(radoc.getId());
 		
 	}
+	
+	public Radoc montarRadoc(String id){
+		
+		Radoc radoc = new Radoc(id, 2015, montarRelatos());
+		
+		return radoc;
+		
+	}
+	
+	public Parecer montarParecer(String id){
+		ArrayList<String> radocs = new ArrayList<String>();
+		radocs.add(idRadoc);
+		Parecer parecer = new Parecer(id, idResolucao, radocs, montarPontuacoes(), "algo", montarNotas(atributoNome));
+		
+		return parecer;
+		
+	}
+	
+	public Atributo montarAtributo(){
 
+		return new Atributo(atributoNome, atributoNome, 2);
+	}
+	
+	public static Tipo montarTipo(String id){
+		Set<Atributo> atributos = new HashSet<Atributo>();
+		
+		if(id.equals(tipoDocente)){
+			atributos.add(new Atributo(atributoNome, atributoNome, 2));
+			atributos.add(new Atributo(atributoCarga, atributoNome, 2));
+		}
+		
+		if(id.equals(tipoPesquisa)){
+			atributos.add(new Atributo(atributoTrabalho, atributoNome, 2));
+			atributos.add(new Atributo(atributoPagina, atributoNome, 2));
+		}
+		return new Tipo(id, id, id, atributos);
+	}
+	
+	public List<Relato> montarRelatos(){
+		ArrayList<Relato> relatos = new ArrayList<Relato>();
+		
+		Map<String, Valor> valores = new HashMap<String, Valor>();
+		valores.put(atributoNome, new Valor("Fulano da Silva"));
+		valores.put(atributoCarga, new Valor(32));
+		
+		relatos.add(new Relato(tipoDocente, valores));
+		
+		Map<String, Valor> valoresPesquisa = new HashMap<String, Valor>();
+		valoresPesquisa.put(atributoTrabalho, new Valor("Teste de software"));
+		valoresPesquisa.put(atributoPagina, new Valor(32));
+		
+		relatos.add(new Relato(tipoPesquisa, valoresPesquisa));
+		
+		return relatos;
+	}
+	
+	public List<Pontuacao> montarPontuacoes(){
+		ArrayList<Pontuacao> pontuacoes = new ArrayList<Pontuacao>();
+		
+		pontuacoes.add(new Pontuacao(atributoNome, new Valor(40)));
+		pontuacoes.add(new Pontuacao(atributoCarga, new Valor(40)));
+		pontuacoes.add(new Pontuacao(atributoTrabalho, new Valor(40)));
+		pontuacoes.add(new Pontuacao(atributoPagina, new Valor(40)));
+		return pontuacoes;
+	}
+	
+	public List<Nota> montarNotas(String atributo){
+		ArrayList<Nota> notas = new ArrayList<Nota>();
+		
+		
+		notas.add(new Nota(new Pontuacao(atributo, new Valor(40)), new Pontuacao(atributo, new Valor(40)), "pqsim"));
+		
+		return notas;
+	}
 }
